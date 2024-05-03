@@ -3,13 +3,16 @@ import Dashboard from "../views/Dashboard.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import DefaultLayout from "../layouts/DefaultLayout.vue";
-import Posts from "../views/Posts.vue";
+import PostsList from "../views/PostsListPage.vue";
 import AuthLayout from "../layouts/AuthLayout.vue";
 import Notifications from "../views/Notifications.vue";
 
 import store from "../store";
-import PostsCreate from "../views/PostsCreate.vue";
-import PostsView from "../views/PostsView.vue";
+import PostsCreate from "../views/PostCreatePage.vue";
+import PostsView from "../views/PostViewPage.vue";
+import CategoryCreate from "../views/CategoryCreatePage.vue";
+import CategoriesList from "../views/CategoriesListPage.vue";
+import CategoryView from "../views/CategoryViewPage.vue";
 
 const routes = [
   {
@@ -20,10 +23,17 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '/app', name: 'Dashboard', component: Dashboard },
-      { path: '/posts', name: 'Posts', component: Posts },
-      { path: '/posts/', name: 'PostCreate', component: PostsCreate },
-      { path: "/posts/:id", name: "PostView", component: PostsView },
+
+      { path: '/posts', name: 'PostsList', component: PostsList },
+      { path: '/posts/:page', name: 'PostsListPage', component: PostsList },
+      { path: "/posts/view/:id", name: "PostView", component: PostsView },
       { path: '/posts/create', name: 'PostsCreate', component: PostsCreate },
+
+
+      { path: '/categories', name: 'CategoriesList', component: CategoriesList },
+      { path: '/category/view', name: 'CategoryView', component: CategoryView },
+      { path: '/category/create', name: 'CategoryCreate', component: CategoryCreate },
+
       { path: '/notifications', name: 'Notifications', component: Notifications }
     ]
   },

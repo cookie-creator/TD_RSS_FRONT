@@ -3,9 +3,8 @@ import store from "./store";
 import router from "./router";
 
 const axiosClient = axios.create({
-  // baseURL: import.meta.env.VUE_APP_REMOTE_API_URL
-  baseURL: 'http://td-rss.dev.com/'
-
+  baseURL: import.meta.env.VUE_APP_REMOTE_API_URL || 'http://0.0.0.0:8081/'
+  // baseURL: 'http://td-rss.dev.com/'
 })
 
 axiosClient.interceptors.request.use(config => {

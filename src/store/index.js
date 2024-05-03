@@ -1,73 +1,6 @@
 import {createStore} from "vuex";
 import axiosClient from "../axios";
 
-const tmpCategories = [
-  {
-    id: 1,
-    name: "1Mobile Apps",
-    slug: "1mobile-apps"
-  },
-  {
-    id: 2,
-    name: "2Mobile Apps",
-    slug: "2mobile-apps"
-  },
-  {
-    id: 3,
-    name: "3Mobile Apps",
-    slug: "3mobile-apps"
-  },
-  {
-    id: 4,
-    name: "4Mobile Apps",
-    slug: "4mobile-apps"
-  }
-];
-const tmpPosts = [
-  {
-    id: 1,
-    title : "'Unclack' for Mac Mutes Your Mic While You're Typing", //
-    guid : "01HSWF2H1Q38BETRV2CEXE1E8Q", //
-    date : "2024-03-26", //
-    description : "Type up notes—or message your coworkers—during team calls.", //
-    thumbnail : "",
-    content : "<p>Ever been in a meeting where you're taking notes, looking things up, or just surreptitiously Slacking with your co-workers? If so, you might want to hide the</p>", //
-    link : "https://lifehacker.com/tech/unclack-mac-mutes-your-mic-while-typing",
-    category : "3Mobile Apps",
-    category_id : 3,
-    slug : "tech/unclack-mac-mutes-your-mic-while-typing",
-    image : "https://lifehacker.com/imagery/articles/01HSWF2H1Q38BETRV2CEXE1E8Q/images-1.fill.size_2000x1091.v1711426061.jpg",
-  },
-  {
-    id: 2,
-    title : "2'Unclack' for Mac Mutes Your Mic While You're Typing",
-    guid : "01HSWF2H1Q38BETRV2CEXE1E8Q",
-    date : "2024-03-26",
-    description : "Type up notes—or message your coworkers—during team calls.",
-    thumbnail : "",
-    content : "<p>Ever been in a meeting where you're taking notes, looking things up, or just surreptitiously Slacking with your co-workers? If so, you might want to hide the</p>",
-    link : "https://lifehacker.com/tech/unclack-mac-mutes-your-mic-while-typing",
-    category : "3Mobile Apps",
-    category_id : 3,
-    slug : "tech/unclack-mac-mutes-your-mic-while-typing",
-    image : "https://lifehacker.com/imagery/articles/01HSWF2H1Q38BETRV2CEXE1E8Q/images-1.fill.size_2000x1091.v1711426061.jpg",
-  },
-  {
-    id: 3,
-    title : "3'Unclack' for Mac Mutes Your Mic While You're Typing",
-    guid : "01HSWF2H1Q38BETRV2CEXE1E8Q",
-    date : "2024-03-26",
-    description : "Type up notes—or message your coworkers—during team calls.",
-    thumbnail : "",
-    content : "<p>Ever been in a meeting where you're taking notes, looking things up, or just surreptitiously Slacking with your co-workers? If so, you might want to hide the</p>",
-    link : "https://lifehacker.com/tech/unclack-mac-mutes-your-mic-while-typing",
-    category : "3Mobile Apps",
-    category_id : 3,
-    slug : "tech/unclack-mac-mutes-your-mic-while-typing",
-    image : "https://lifehacker.com/imagery/articles/01HSWF2H1Q38BETRV2CEXE1E8Q/images-1.fill.size_2000x1091.v1711426061.jpg",
-  },
-];
-
 const store = createStore({
   state: {
     user: {
@@ -79,14 +12,27 @@ const store = createStore({
       // token: 111,
     },
     posts: {
-      loading: false,
+      loading: true,
       links: [],
-      data: [...tmpPosts]
+      data: [],
+    },
+    currentPost: {
+      data: {},
+      loading: false,
     },
     categories: {
       loading: false,
       links: [],
-      data: [...tmpCategories]
+      data: []
+    },
+    currentCategory: {
+      data: {},
+      loading: false,
+    },
+    notification: {
+      show: false,
+      type: 'success',
+      message: ''
     },
     dashboard: {
       data: {},
@@ -156,37 +102,112 @@ const store = createStore({
         })
     },
     /* Post */
-    getPosts({commit}) {
-      //commit('setPostsLoading', true)
-      return axiosClient.get('/api/v1/posts')
+    getPosts({commit}, page = null) {
+      let url = (! page) ? '/api/v1/posts' : '/api/v1/posts?page=' + page;
+      commit('setPostsLoading', true);
+      return axiosClient.get(url)
           .then((res) => {
-            // console.log(res.data);
-            commit('setPostsLoading', false)
+            commit('setPostsLoading', false);
             commit("setPosts", res.data);
           })
     },
-    savePost({commit}, post) {
+    getPost({commit}, id) {
+      commit("setCurrentPostLoading", true);
+      return axiosClient
+          .get(`/api/v1/posts/${id}`)
+          .then((res) => {
+            commit("setCurrentPost", res.data);
+            commit("setCurrentPostLoading", false);
+            return res;
+          })
+          .catch((err) => {
+            commit("setCurrentPostLoading", false);
+            throw err;
+          });
+    },
+    deletePost({dispatch}, id) {
+      return axiosClient
+          .delete(`/api/v1/posts/${id}`)
+          .then((res) => {
+            dispatch('getPosts');
+            return res;
+          });
+    },
+    updatePost({commit}, post) {
+      return axiosClient
+          .put(`/api/v1/posts/${post.id}`, post)
+          .then((res) => {
+            commit('updatePost', res.data);
+            return res;
+          });
+    },
+    createPost({commit}, post) {
       let response;
-      if (post.id) {
-        // update
-        return axiosClient
-            .put(`/api/v1/posts/${post.id}`, post)
-            .then((res) => {
-              commit('updatePost', res.data);
-              return res;
-            })
-      } else {
         // Create
-        response = axiosClient
-            .post('/api/v1/posts')
-            .then((res) => {
-              commit('savePost', res.data);
-              return res;
-            })
-      }
-
+      response = axiosClient
+          .post('/api/v1/posts', post)
+          .then((res) => {
+            commit('savePost', res.data);
+            return res;
+          });
+      return response;
+    },
+    changePostsPage({commit}, page) {
+      commit('changePostsPage', page);
+    },
+    /* Categories */
+    getCategories({commit}) {
+      commit('setCategoriesLoading', true);
+      return axiosClient.get('/api/v1/categories')
+          .then((res) => {
+            commit('setCategoriesLoading', false);
+            commit("setCategories", res.data);
+          })
+    },
+    getCategory({commit}, id) {
+      commit("setCurrentCategoryLoading", true);
+      return axiosClient
+          .get(`/api/v1/categories/${id}`)
+          .then((res) => {
+            commit("setCurrentCategory", res.data);
+            commit("setCurrentCategoryLoading", false);
+            return res;
+          })
+          .catch((err) => {
+            commit("setCurrentCategoryLoading", false);
+            throw err;
+          });
+    },
+    updateCategory({dispatch}, category) {
+      let response;
+      // update
+      return axiosClient
+          .put(`/api/v1/categories/${category.id}`, category)
+          .then((res) => {
+            dispatch('getCategories')
+            return res;
+          });
+    },
+    createCategory({dispatch}, category) {
+      let response;
+      // Create
+      response = axiosClient
+          .post('/api/v1/categories', category)
+          .then((res) => {
+            dispatch('getCategories')
+            return res;
+          });
+    },
+    deleteCategory({dispatch}, id) {
+      return axiosClient
+          .delete(`/api/v1/categories/${id}`)
+          .then((res) => {
+            dispatch('getCategories');
+            return res;
+          });
     },
   },
+
 
   mutations: {
     logout: (state) => {
@@ -208,13 +229,15 @@ const store = createStore({
       state.dashboard.data = data
     },
     setLoginPageErrors: (state, data) => {
-      console.log('setLoginERRors', data)
       state.errors.login.data = data
     },
 
     // Post
     savePost: (state, post) => {
-      state.posts = [...state.posts, post.data];
+      state.posts = [...state.posts.data, post.data];
+    },
+    changePostsPage: (state, page) => {
+      state.posts.currentPage = page;
     },
     updatePost: (state, post) => {
       state.posts = state.posts.map((s) => {
@@ -227,9 +250,50 @@ const store = createStore({
     setPostsLoading: (state, loading) => {
       state.posts.loading = loading;
     },
+    setCurrentPostLoading: (state, loading) => {
+      state.currentPost.loading = loading;
+    },
     setPosts: (state, posts) => {
       state.posts.links = posts.meta.links;
       state.posts.data = posts.data;
+    },
+    setCurrentPost: (state, post) => {
+      state.currentPost.data = post.post;
+    },
+
+    // Category
+    saveCategory: (state, category) => {
+      state.categories = [...state.categories, category.data];
+    },
+    updateCategory: (state, category) => {
+      state.categories = state.categories.map((s) => {
+        if (s.id === category.id) {
+          return category;
+        }
+      });
+      state.categories = [...state.categories, category.data];
+    },
+    setCategoriesLoading: (state, loading) => {
+      state.posts.loading = loading;
+    },
+    setCurrentCategoryLoading: (state, loading) => {
+      state.currentCategory.loading = loading;
+    },
+    setCategories: (state, categories) => {
+      state.categories.links = categories.links;
+      state.categories.data = categories.data;
+    },
+    setCurrentCategory: (state, category) => {
+      state.currentCategory.data = category.category;
+    },
+    notify: (state, {message, type}) => {
+      console.log(message);
+      state.notification.show = true;
+      state.notification.type = type;
+      state.notification.message = message;
+      setTimeout(() => {
+        state.notification.show = false;
+      }, 3000)
     },
   },
   modules: {}

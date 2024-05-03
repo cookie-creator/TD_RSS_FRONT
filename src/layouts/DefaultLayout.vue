@@ -6,10 +6,12 @@ import {mapState, useStore} from "vuex";
 import {computed} from "vue";
 import {useRoute} from "vue-router";
 import router from "../router/index.js";
+import NotificationSpan from "../components/NotificationSpan.vue";
 
 const navigation = [
     { name: 'Dashboard', to: {name: 'Dashboard'}, current: true },
-    { name: 'Posts', to: {name: 'Posts'}, current: false },
+    { name: 'Posts', to: {name: 'PostsList'}, current: false },
+    { name: 'Categories', to: {name: 'CategoriesList'}, current: false },
     { name: 'Notifications', to: {name: 'Notifications'}, current: false },
 ];
 const userNavigation = [
@@ -18,16 +20,17 @@ const userNavigation = [
 ];
 export default {
     components: {
-        Disclosure,
-        DisclosureButton,
-        DisclosurePanel,
-        Menu,
-        MenuButton,
-        MenuItem,
-        MenuItems,
-        Bars3Icon,
-        BellIcon,
-        XMarkIcon
+      NotificationSpan,
+      Disclosure,
+      DisclosureButton,
+      DisclosurePanel,
+      Menu,
+      MenuButton,
+      MenuItem,
+      MenuItems,
+      Bars3Icon,
+      BellIcon,
+      XMarkIcon
     },
     computed: {
         ...mapState(['user'])
@@ -191,6 +194,7 @@ export default {
 
         <router-view :key="$route.path"></router-view>
 
+        <NotificationSpan />
     </div>
 </template>
 
