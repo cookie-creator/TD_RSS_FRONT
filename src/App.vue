@@ -1,13 +1,14 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import {mapState} from "vuex"
+import Pusher from 'pusher-js'
 export default {
-    components: {
-        HelloWorld
-    },
-    computed: {
-        ...mapState(['user'])
-    }
+  components: {
+    HelloWorld
+  },
+  computed: {
+    ...mapState(['user'])
+  }
 }
 </script>
 

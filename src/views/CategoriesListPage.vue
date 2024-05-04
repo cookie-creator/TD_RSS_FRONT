@@ -46,10 +46,6 @@ function editCategory(category) {
   editFormShow.value = true;
   editFormAction.value = 'edit';
   store.dispatch("getCategory", category.id);
-  store.commit("notify", {
-    type: "success",
-    message: "The survey was successfully loaded loaded" ,
-  });
 }
 
 function createCategory() {
@@ -69,7 +65,7 @@ function saveCategory() {
     });
     store.commit("notify", {
       type: "success",
-      message: "The survey was successfully saved",
+      message: "The category was successfully saved",
     });
   } else if (editFormAction.value === 'create') {
     store.dispatch("createCategory", {...model.value}).then(({data}) => {
@@ -77,7 +73,7 @@ function saveCategory() {
     });
     store.commit("notify", {
       type: "success",
-      message: "The survey was successfully created",
+      message: "The category was successfully created",
     });
   }
 }

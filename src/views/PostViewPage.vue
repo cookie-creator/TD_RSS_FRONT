@@ -43,7 +43,6 @@ watch(
 );
 
 store.dispatch("getCategories");
-// If the current component is rendered on survey update route we make a request to fetch survey
 if (route.params.id) {
   store.dispatch("getPost", route.params.id);
 }

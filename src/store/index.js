@@ -99,6 +99,7 @@ const store = createStore({
       return axiosClient.get('/api/v1/auth/me')
         .then(res => {
           commit('setUser', res.data)
+          return res.data;
         })
     },
     /* Post */
