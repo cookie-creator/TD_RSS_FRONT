@@ -8,6 +8,7 @@ import {useRoute} from "vue-router";
 import router from "../router/index.js";
 import NotificationSpan from "../components/NotificationSpan.vue";
 import Pusher from "pusher-js";
+import store from "../store/index.js";
 
 const navigation = [
     { name: 'Dashboard', to: {name: 'Dashboard'}, current: true },
@@ -40,8 +41,6 @@ export default {
         const store = useStore();
         const route = useRoute();
 
-        Pusher.logToConsole = true;
-
         const pusher = ref(false);
         const channel = ref(false);
 
@@ -52,21 +51,22 @@ export default {
             })
         }
 
-        store.dispatch("getUser").then((res) => {
+        Pusher.logToConsole = true;
 
-          pusher.value = new Pusher('8ce6a38bfe1e4364b1da',
-              {
-                cluster: 'eu',
-                channelAuthorization: {
-                  //endpoint: 'http://example.com/pusher/auth'
-                  endpoint: import.meta.env.VUE_APP_REMOTE_API_URL + 'pusher/auth' || 'http://0.0.0.0:8081/pusher/auth'
-                },
-              });
+        store.dispatch("getUser")
+          .then((res) => {
+            pusher.value = new Pusher(import.meta.env.VITE_APP_PUSHER_APP_KEY,
+                {
+                  cluster: 'eu',
+                  channelAuthorization: {
+                    endpoint: import.meta.env.VITE_APP_REMOTE_API_URL + 'api/v1/broadcasting/auth'
+                  },
+                });
 
-          channel.value = pusher.value.subscribe('private-notification.User.1.' + res.user.id);
-          channel.value.bind('NewNotificationCreatedBroadcastEvent', function(data) {
-            app.messages.peush(JSON.stringify(data));
-          });
+            channel.value = pusher.value.subscribe('notification.User.' + res.user.id);
+            channel.value.bind('NewNotificationCreatedBroadcastEvent', function(data) {
+              app.messages.peush(JSON.stringify(data));
+            });
         });
 
         return {
