@@ -34,8 +34,7 @@
     }
 
     function changePage(newValue) {
-      posts.currentPost = newValue;
-      store.dispatch("getPosts", posts.currentPost);
+      store.dispatch("getPosts", newValue);
     }
 </script>
 

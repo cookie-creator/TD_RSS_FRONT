@@ -25,6 +25,11 @@ const store = createStore({
       data: {},
       loading: false,
     },
+    notifications: {
+      loading: false,
+      links: [],
+      data: []
+    },
     notification: {
       show: false,
       type: 'success',
@@ -203,6 +208,16 @@ const store = createStore({
             return res;
           });
     },
+    /* Notifications */
+    getNotifications({commit}, page = null) {
+      let url = (! page) ? '/api/v1/notifications' : '/api/v1/notifications?page=' + page;
+      commit('setNotificationsLoading', true);
+      return axiosClient.get(url)
+          .then((res) => {
+            commit("setNotifications", res.data);
+            commit('setNotificationsLoading', false);
+          })
+    },
   },
 
 
@@ -282,6 +297,13 @@ const store = createStore({
     },
     setCurrentCategory: (state, category) => {
       state.currentCategory.data = category.category;
+    },
+    setNotifications: (state, notifications) => {
+      state.notifications.links = notifications.links;
+      state.notifications.data = notifications.data;
+    },
+    setNotificationsLoading: (state, loading) => {
+      state.notifications.loading = loading;
     },
     notify: (state, {message, type}) => {
       console.log(message);
