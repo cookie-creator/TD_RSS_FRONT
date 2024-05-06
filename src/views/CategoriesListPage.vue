@@ -7,7 +7,7 @@ import CategoriesListItemComponent from "../components/CategoriesListItemCompone
 
 const store = useStore();
 const currentCategory = computed(() => store.state.currentCategory);
-const categories = computed(() => store.state.categories);
+const categories = computed(() => store.state.categories.data);
 
 store.dispatch("getCategories");
 
@@ -106,7 +106,7 @@ function saveCategory() {
             <ul  role="list" class="divide-y divide-gray-100">
               <CategoriesListItemComponent
                   class="flex justify-between gap-x-6 py-5"
-                  v-for="category in categories.data"
+                  v-for="category in categories"
                   :key="category.id"
                   :category="category"
                   @delete="deleteCategory(category)"

@@ -164,7 +164,7 @@ const store = createStore({
           .then((res) => {
             commit('setCategoriesLoading', false);
             commit("setCategories", res.data);
-          })
+          });
     },
     getCategory({commit}, id) {
       commit("setCurrentCategoryLoading", true);
@@ -217,6 +217,22 @@ const store = createStore({
             commit("setNotifications", res.data);
             commit('setNotificationsLoading', false);
           })
+    },
+    readNotification({dispatch}, id) {
+      return axiosClient
+          .post(`/api/v1/notifications/read`, {'id':id})
+          .then((res) => {
+            dispatch("getNotifications");
+            return res;
+          });
+    },
+    unreadNotification({dispatch}, id) {
+      return axiosClient
+          .post(`/api/v1/notifications/unread`, {'id':id})
+          .then((res) => {
+            dispatch("getNotifications");
+            return res;
+          });
     },
   },
 
@@ -293,20 +309,19 @@ const store = createStore({
     },
     setCategories: (state, categories) => {
       state.categories.links = categories.links;
-      state.categories.data = categories.data;
+      state.categories.data = categories;
     },
     setCurrentCategory: (state, category) => {
       state.currentCategory.data = category.category;
     },
     setNotifications: (state, notifications) => {
-      state.notifications.links = notifications.links;
+      state.notifications.links = notifications.meta.links;
       state.notifications.data = notifications.data;
     },
     setNotificationsLoading: (state, loading) => {
       state.notifications.loading = loading;
     },
     notify: (state, {message, type}) => {
-      console.log(message);
       state.notification.show = true;
       state.notification.type = type;
       state.notification.message = message;

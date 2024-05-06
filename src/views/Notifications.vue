@@ -6,7 +6,6 @@
     import PaginationSpan from "../components/PaginationSpan.vue";
     import {useStore} from "vuex";
     import {computed, watch} from "vue";
-    import NotificationSpan from "../components/NotificationSpan.vue";
 
     const store = useStore();
     const notifications = computed(() => store.state.notifications);
@@ -14,15 +13,25 @@
     store.dispatch("getNotifications");
 
     function readNotification(notification) {
-      if (confirm(`Are you sure you want to delete this post?`)) {
-        store.dispatch("readNotification", notification.id).then(() => {
-          store.dispatch("getNotifications");
-        });
-      }
+      store.dispatch("readNotification", notification.id).then(() => {
+        store.dispatch("getNotifications");
+      });
+    }
+
+    function unreadNotification(notification) {
+      store.dispatch("unreadNotification", notification.id);
     }
 
     function changePage(newValue) {
       store.dispatch("getNotifications", newValue);
+    }
+
+    function formatDatetime(date) {
+      const datetime = new Date(date);
+
+      // Format the date and time as desired
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+      return datetime.toLocaleString('en-US', options);
     }
 </script>
 
@@ -35,35 +44,35 @@
     </template>
     <main>
       <div class="mx-auto max-w-7xl py-6">
-        {{notifications}}
         <ProgressLoadingSpan v-if="notifications.loading" :loading="notifications.loading" />
         <div v-else class="notifications-main">
-          <div class="notifications-list grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 mb-2">
-
-            <ul role="list" class="divide-y divide-gray-100">
-              <li v-for="notification in notifications" :key="person.email" class="flex justify-between gap-x-6 py-5">
+          <div class="notifications-list mb-4">
+            <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 ">
+              <li v-for="notification in notifications.data" :key="notification.id"
+                  class="flex justify-between gap-x-6 py-3 px-3
+                    rounded-lg border-solid border shadow"
+                  v-bind:class="(! notification.read) ? 'border-indigo-700' : 'border-gray-50'">
                 <div class="flex min-w-0 gap-x-4">
-                  <img class="h-12 w-12 flex-none rounded-full bg-gray-50" :src="person.imageUrl" alt="" />
                   <div class="min-w-0 flex-auto">
-                    <p class="text-sm font-semibold leading-6 text-gray-900">{{ person.name }}</p>
-                    <p class="mt-1 truncate text-xs leading-5 text-gray-500">{{ person.email }}</p>
+                    <p class="text-sm font-semibold leading-6 text-gray-900">{{ notification.title }}</p>
+                    <p class="mt-1 truncate text-xs leading-5 text-gray-500">{{ notification.description }}</p>
                   </div>
                 </div>
                 <div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
-                  <p class="text-sm leading-6 text-gray-900">{{ person.role }}</p>
-                  <p v-if="person.lastSeen" class="mt-1 text-xs leading-5 text-gray-500">
-                    Last seen <time :datetime="person.lastSeenDateTime">{{ person.lastSeen }}</time>
+                  <p class="mt-1 text-xs leading-5 text-gray-500">
+                    Created <time :datetime="notification.date">{{ formatDatetime(notification.date) }}</time>
                   </p>
-                  <div v-else class="mt-1 flex items-center gap-x-1.5">
-                    <div class="flex-none rounded-full bg-emerald-500/20 p-1">
-                      <div class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    </div>
-                    <p class="text-xs leading-5 text-gray-500">Online</p>
+                  <div class="mt-1 flex items-center gap-x-1.5">
+                    <a v-if="notification.read"
+                       @click="unreadNotification(notification)"
+                       class="text-sm text-zinc-700 border-b border-dashed border-zinc-700" href="#">Unread</a>
+                    <a v-else
+                       @click="readNotification(notification)"
+                       class="text-sm text-indigo-700 border-b border-dashed border-indigo-700" href="#">Read</a>
                   </div>
                 </div>
               </li>
             </ul>
-
           </div>
           <PaginationSpan :links="notifications.links" @update="changePage" />
         </div>
@@ -73,5 +82,5 @@
 </template>
 
 <style scoped>
-
+  .link-read {}
 </style>
