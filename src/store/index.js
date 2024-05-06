@@ -12,6 +12,14 @@ const store = createStore({
       links: [],
       data: [],
     },
+    postsFilter: {
+      page: 1,
+      search: '',
+      from_date: false,
+      to_date: false,
+      all: false,
+      category_id: 0,
+    },
     currentPost: {
       data: {},
       loading: false,
@@ -104,8 +112,21 @@ const store = createStore({
         })
     },
     /* Post */
-    getPosts({commit}, page = null) {
-      let url = (! page) ? '/api/v1/posts' : '/api/v1/posts?page=' + page;
+    getPosts({commit}, params = null) {
+      let url = '/api/v1/posts';
+
+      if (params !== null && params.page !== undefined && params.page !== false) {
+        url += `?page=${params.page}`;
+      }
+
+      if (params !== null && params.category_id !== undefined && params.category_id !== false) {
+        url += (url.includes('?') ? '&' : '?') + `category_id=${params.category_id}`;
+      }
+
+      if (params !== null && params.search !== undefined && params.search !== false) {
+        url += (url.includes('?') || url.includes('&') ? '&' : '?') + `search=${encodeURIComponent(params.search)}`;
+      }
+
       commit('setPostsLoading', true);
       return axiosClient.get(url)
           .then((res) => {
@@ -258,6 +279,10 @@ const store = createStore({
     },
     setLoginPageErrors: (state, data) => {
       state.errors.login.data = data
+    },
+    // PostsFilter
+    setPostsFilterCategoryDefault: (state) => {
+      state.postsFilter.category_id = state.categories.data[0].id
     },
 
     // Post
