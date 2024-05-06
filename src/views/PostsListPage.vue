@@ -48,6 +48,12 @@
       search: listFilter.value.search === '' ? '' : listFilter.value.search
     });
   }
+
+  function filterSortingChanged() {
+    store.dispatch("getPosts", {
+      sorting: listFilter.value.sorting
+    });
+  }
 </script>
 
 <template>
@@ -70,6 +76,7 @@
         <main>
             <div class="mx-auto max-w-7xl py-6">
               <div class="grid grid-rows-1 grid-flow-col gap-4 mb-10">
+
                 <div>
                   <div class="max-w-md">
                     <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
@@ -89,6 +96,7 @@
                     </div>
                   </div>
                 </div>
+
                 <div>
                   <select id="category_id" name="category_id"
                           v-model="listFilter.category_id"
@@ -102,8 +110,17 @@
                     </option>
                   </select>
                 </div>
-                <div></div>
-                <div></div>
+
+                <div>
+                  <select id="sorting" name="sorting"
+                          v-model="listFilter.sorting"
+                          @change="filterSortingChanged"
+                          class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <option v-for="sorting in listFilter.available_sorting" :value="sorting.value" :selected="sorting.value === listFilter.sorting">
+                      {{ sorting.name }}
+                    </option>
+                  </select>
+                </div>
               </div>
 
               <ProgressLoadingSpan v-if="posts.loading" :loading="posts.loading" />

@@ -19,6 +19,13 @@ const store = createStore({
       to_date: false,
       all: false,
       category_id: 0,
+      available_sorting: [
+        {name: 'Date latest', value: 'created_at-desc'},
+        {name: 'Date oldest', value: 'created_at-asc'},
+        {name: 'Title A-z', value: 'title-asc'},
+        {name: 'Title Z-a', value: 'title-desc'},
+      ],
+      sorting: 'date-desc',
     },
     currentPost: {
       data: {},
@@ -125,6 +132,10 @@ const store = createStore({
 
       if (params !== null && params.search !== undefined && params.search !== false) {
         url += (url.includes('?') || url.includes('&') ? '&' : '?') + `search=${encodeURIComponent(params.search)}`;
+      }
+
+      if (params !== null && params.sorting !== undefined && params.sorting !== false) {
+        url += (url.includes('?') || url.includes('&') ? '&' : '?') + `sorting=${encodeURIComponent(params.sorting)}`;
       }
 
       commit('setPostsLoading', true);
